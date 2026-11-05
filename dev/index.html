@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>TOPGUN OPERATOR (uji lokal)</title>
+<script src="gas-mock.js"></script>
+<script>
+/* Menyusun gas/Index.html seperti doGet() lalu mengisi data contoh khusus uji lokal. */
+(async function () {
+  const baca = n => fetch('../gas/' + n).then(r => r.text());
+  const [kode, index, css, js] = await Promise.all([baca('Kode.gs'), baca('Index.html'), baca('Stylesheet.html'), baca('JavaScript.html')]);
+  (0, eval)(kode + `
+    ;window.__dev = { bacaTabel_, tambahBaris_, setProps_, hashPass_, prop_ };`);
+  if (!localStorage.getItem('gasmock_v1') || !gasMockDb.props.SPREADSHEET_ID) {
+    setupAppEnvironment();
+    const d = window.__dev, salt = 'dev-salt';
+    d.setProps_({ ADMIN_SALT: salt, ADMIN_PASS_HASH: d.hashPass_('Dev-admin-12345', salt), ADMIN_WAJIB_GANTI: new URLSearchParams(location.search).has('wajib') ? 'YA' : 'TIDAK' });
+    const gambar = 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360"><rect width="640" height="360" fill="#f2c230"/><rect x="60" y="270" width="340" height="50" rx="25" fill="#222"/><rect x="100" y="170" width="240" height="96" fill="#e0a90c"/><rect x="120" y="90" width="110" height="80" fill="#333"/><path d="M310 190 420 60l140 110-26 30-110-88-96 112z" fill="#e0a90c"/></svg>');
+    gasMockDb.sheets.AlatBerat[1][2] = gambar;
+    const soal = [];
+    const tema = ['tekanan oli hidrolik', 'jarak aman ayunan boom', 'pemeriksaan track shoe', 'prosedur pemanasan mesin', 'batas kemiringan kerja'];
+    for (let i = 1; i <= 30; i++) soal.push({ ID: crypto.randomUUID(), Alat: 'Excavator', Tipe: 'PG', Pertanyaan: `Soal uji ${i}: apa tindakan yang benar terkait ${tema[i % 5]} saat bekerja di area tambang?`, A: `Jawaban benar ${i}`, B: 'Lanjut bekerja tanpa pemeriksaan', C: 'Mengabaikan rambu dan pengawas', D: 'Menunggu sampai shift berikutnya', Kunci: 'A', Gambar: i === 2 ? gambar : '', Aktif: 'YA' });
+    for (let i = 1; i <= 6; i++) soal.push({ ID: crypto.randomUUID(), Alat: 'Excavator', Tipe: 'ESAI', Pertanyaan: `Soal essai uji ${i}: jelaskan langkah aman ${tema[i % 5]}.`, A: '', B: '', C: '', D: '', Kunci: 'Pedoman: sebutkan minimal tiga langkah.', Gambar: '', Aktif: 'YA' });
+    d.tambahBaris_('Soal', soal);
+    d.tambahBaris_('Peserta', [{ 'ID Peserta': '00123', Nama: 'Peserta Terdaftar', Departemen: 'Produksi', Crew: 'B', Sumber: 'Admin' }]);
+  }
+  const halaman = index.replace("<?!= include_('Stylesheet') ?>", css);
+  const [awal, akhir] = halaman.split("<?!= include_('JavaScript') ?>");
+  document.open(); document.write(awal);
+  const m = js.match(/<script>([\s\S]*)<\/script>/);
+  document.write(akhir); document.close();
+  const s = document.createElement('script'); s.textContent = m[1]; document.body.appendChild(s);
+})();
+</script>
