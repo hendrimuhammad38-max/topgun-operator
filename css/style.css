@@ -1,4 +1,3 @@
-<style>
 /* Bahan dasar: satu permukaan abu kebiruan yang ditekan keluar atau ke dalam. */
 :root {
   --bg: #E4E8ED;
@@ -331,4 +330,3 @@ td .ringkas { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: v
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
 @media print { .ujian { display: none; } }
-</style>

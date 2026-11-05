@@ -1,4 +1,3 @@
-<script>
 'use strict';
 /* ============================================================
    TOPGUN OPERATOR — Frontend SPA
@@ -40,28 +39,38 @@ const ALAT_BAWAAN = `<svg viewBox="0 0 320 180" aria-hidden="true"><g fill="curr
 /* ── Pemanggil server ── */
 let jumlahMuat = 0;
 function tandaMuat(d) { jumlahMuat += d; $('#memuat').hidden = jumlahMuat <= 0; }
-function panggil(aksi, data = {}, { senyap = false } = {}) {
-  return new Promise((sukses, gagal) => {
-    if (!senyap) tandaMuat(1);
-    const akhiri = () => { if (!senyap) tandaMuat(-1); };
-    google.script.run
-      .withSuccessHandler(teks => {
-        akhiri();
-        let r;
-        try { r = JSON.parse(teks); } catch (e) { const g = new Error('Jawaban server tidak terbaca.'); g.jaringan = true; return gagal(g); }
-        if (r.success) return sukses(r.data);
-        const g = new Error(r.message); g.kode = r.code;
-        if (r.code === 'SESI') { hapusSesi(); keluarKeMasuk(r.message); }
-        gagal(g);
-      })
-      .withFailureHandler(e => {
-        akhiri();
-        const g = new Error('Tidak tersambung ke server. Periksa jaringan lalu coba lagi.');
-        g.jaringan = true; g.asli = e;
-        gagal(g);
-      })
-      .api(aksi, S.token, data);
-  });
+const GAS_URL = (window.APP_CONFIG || {}).GAS_URL || '';
+function galatJaringan(pesan) { const g = new Error(pesan); g.jaringan = true; return g; }
+async function panggil(aksi, data = {}, { senyap = false } = {}) {
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(GAS_URL) || /GANTI|XXXX/.test(GAS_URL)) {
+    throw new Error('Alamat server belum diisi. Isi GAS_URL di js/config.js dengan alamat /exec dari Apps Script.');
+  }
+  if (!senyap) tandaMuat(1);
+  const batas = new AbortController();
+  const jam = setTimeout(() => batas.abort(), aksi === 'gambar.unggah' ? 180000 : 60000);
+  let r;
+  try {
+    // text/plain mencegah CORS preflight yang ditolak Apps Script.
+    const res = await fetch(GAS_URL, {
+      method: 'POST', redirect: 'follow', signal: batas.signal,
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ aksi, token: S.token, data })
+    });
+    const teks = await res.text();
+    try { r = JSON.parse(teks); } catch (e) {
+      throw galatJaringan('Server tidak mengirim data yang benar. Pastikan akses Web App diatur ke Anyone.');
+    }
+  } catch (e) {
+    if (e.jaringan) throw e;
+    throw galatJaringan('Tidak tersambung ke server. Periksa jaringan lalu coba lagi.');
+  } finally {
+    clearTimeout(jam);
+    if (!senyap) tandaMuat(-1);
+  }
+  if (r.success) return r.data;
+  const g = new Error(r.message); g.kode = r.code;
+  if (r.code === 'SESI') { hapusSesi(); keluarKeMasuk(r.message); }
+  throw g;
 }
 function toast(pesan, bahaya) {
   const t = $('#toast');
@@ -515,7 +524,7 @@ const AC = {
     else AC.pulih();
   },
   blur() {
-    // Jeda singkat agar sentuhan tak sengaja di bilah atas Apps Script tidak langsung dihukum.
+    // Jeda singkat agar kehilangan fokus sesaat tidak langsung dihukum.
     document.body.classList.add('tersembunyi');
     setTimeout(() => {
       if (!AC.aktif) return;
@@ -1142,4 +1151,3 @@ document.addEventListener('keydown', e => {
     }
   } catch (e) { hapusSesi(); }
 })();
-</script>

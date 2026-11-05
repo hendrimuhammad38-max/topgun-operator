@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <base target="_top">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
+  <title>TOPGUN OPERATOR</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath d='M6 24 24 8l18 16-7 6-11-10-11 10z' fill='%232C333D'/%3E%3Cpath d='M13 35l11-10 11 10-6 5-5-4.5-5 4.5z' fill='%231CAEE8'/%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <?!= include_('Stylesheet') ?>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
   <div id="memuat" class="memuat" role="status" aria-live="polite" hidden><span></span></div>
   <main id="app"><p class="awal-muat">Menyiapkan aplikasi</p></main>
   <div id="modal-akar"></div>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <?!= include_('JavaScript') ?>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
