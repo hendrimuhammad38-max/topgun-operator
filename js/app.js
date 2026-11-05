@@ -1128,6 +1128,13 @@ document.addEventListener('change', e => {
     if (t.dataset.filter === 'alatH') { A.filterAlatH = t.value; A.halaman.hasil = 0; isiNilai(); }
   }
 });
+/* Gambar gagal dimuat: logo kembali ke lambang bawaan, gambar alat kembali ke siluet. */
+document.addEventListener('error', e => {
+  const g = e.target;
+  if (g.tagName !== 'IMG') return;
+  if (g.classList.contains('logo')) g.outerHTML = LOGO_BAWAAN;
+  else if (g.closest('.bengkel')) g.outerHTML = ALAT_BAWAAN;
+}, true);
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && $('.modal') && !S.modalTetap) tutupModal();
   if (e.key === 'Tab' && $('.modal')) {
